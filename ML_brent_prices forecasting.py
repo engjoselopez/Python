@@ -1,13 +1,20 @@
 import numpy as np
 import pandas as pd
 import matplotlib.pyplot as plt
+from sklearn.ensemble import RandomForestClassifier  # o RandomForestRegressor
+from sklearn.datasets import load_iris
+from sklearn.model_selection import train_test_split
+from sklearn.metrics import accuracy_score
 from sklearn.metrics import r2_score
 from sklearn.linear_model import LinearRegression
 from sklearn.model_selection import train_test_split
+from sklearn.metrics import mean_squared_error
+
 
 # Cargar el dataset (ajusta el path si es necesario)
 df = pd.read_csv('brent_prices.csv')
 df = df.iloc[1:,:]
+
 # Preprocesamiento
 df.columns = df.columns.str.strip()  # Limpia espacios en nombres de columnas
 df['Date'] = pd.to_datetime(df['Date'])  # Asegura que la columna Date sea tipo datetime
@@ -24,14 +31,14 @@ y = df['Close']
 X_train, X_test, y_train, y_test = train_test_split(X, y, test_size=0.25, random_state=42)
 
 # Entrenamiento del modelo
-model = LinearRegression()
+model =  RandomForestClassifier(n_estimators=100, random_state=42)
 model.fit(X_train, y_train)
 
 # Nuevos datos para predicción (simulados)
 X_pred = pd.DataFrame({
-    "Open":  df.loc[:,"Open"][80:85],
-    "High":  df.loc[:,"High"][80:85],
-    "Low":   df.loc[:,"Low"][80:85]
+    "Open":  df.loc[:,"Open"][80:],
+    "High":  df.loc[:,"High"][80:],
+    "Low":   df.loc[:,"Low"][80:]
 })
 
 # Predicción
@@ -39,7 +46,7 @@ y_pred = model.predict(X_pred)
 
 # Visualización: comparar predicción con valores reales
 # Para evitar confusión, graficamos solo los valores predichos junto a sus fechas simuladas
-fechas_pred = pd.date_range(start="2025-08-10", periods=len(y_pred), freq="D")
+fechas_pred = pd.date_range(start="2025-03-20", periods=len(y_pred), freq="D")
 
 plt.figure(figsize=(20, 10))
 plt.plot(df.index, y, label='Actual', marker='o', alpha=0.5)
@@ -53,6 +60,10 @@ plt.gca().invert_yaxis()
 plt.tight_layout()
 plt.ylim(150, 20)
 plt.show()
+
+rmse = np.sqrt(mean_squared_error(y[80:], y_pred))
+print("RMSE:", rmse)
+
 
 # Evaluación del modelo con datos de prueba reales
 y_test_pred = model.predict(X_test)
