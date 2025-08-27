@@ -7,7 +7,7 @@ from sklearn.model_selection import train_test_split
 
 # Cargar el dataset (ajusta el path si es necesario)
 df = pd.read_csv('brent_prices.csv')
-
+df = df.iloc[1:,:]
 # Preprocesamiento
 df.columns = df.columns.str.strip()  # Limpia espacios en nombres de columnas
 df['Date'] = pd.to_datetime(df['Date'])  # Asegura que la columna Date sea tipo datetime
@@ -29,9 +29,9 @@ model.fit(X_train, y_train)
 
 # Nuevos datos para predicción (simulados)
 X_pred = pd.DataFrame({
-    "Open":  [66.25, 66.80, 66.14, 65.76, 66.87],
-    "High":  [67.13, 67.06, 66.33, 66.99, 67.06],
-    "Low":   [65.81, 65.98, 65.01, 65.55, 65.73]
+    "Open":  df.loc[:,"Open"][80:85],
+    "High":  df.loc[:,"High"][80:85],
+    "Low":   df.loc[:,"Low"][80:85]
 })
 
 # Predicción
@@ -41,7 +41,7 @@ y_pred = model.predict(X_pred)
 # Para evitar confusión, graficamos solo los valores predichos junto a sus fechas simuladas
 fechas_pred = pd.date_range(start="2025-08-10", periods=len(y_pred), freq="D")
 
-plt.figure(figsize=(10, 5))
+plt.figure(figsize=(20, 10))
 plt.plot(df.index, y, label='Actual', marker='o', alpha=0.5)
 plt.plot(fechas_pred, y_pred, label='Predicted', marker='x', color='orange')
 plt.title('Brent Crude Price Prediction')
@@ -49,7 +49,9 @@ plt.xlabel('Fecha')
 plt.ylabel('Precio (USD)')
 plt.legend()
 plt.grid(True)
+plt.gca().invert_yaxis()
 plt.tight_layout()
+plt.ylim(150, 20)
 plt.show()
 
 # Evaluación del modelo con datos de prueba reales
